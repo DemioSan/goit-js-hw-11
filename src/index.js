@@ -113,3 +113,9 @@ function showLoader() {
 function hideLoader() {
   loader.style.display = 'none';
 }
+function loadMoreImages() {
+  page += 1;
+  searchImages(currentQuery, page);
+}
+
+loadMoreBtn.addEventListener('click', loadMoreImages);
