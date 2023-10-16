@@ -8,11 +8,13 @@ const searchForm = document.getElementById('search-form');
 const gallery = document.querySelector('.gallery');
 const loadMoreBtn = document.querySelector('.load-more');
 const lightbox = new SimpleLightbox('.gallery-item');
+const loader = document.querySelector('.loader');
 
 let page = 1;
 let currentQuery = '';
 
 loadMoreBtn.style.display = 'none';
+loader.style.display = 'none';
 
 async function fetchImages(query, pageNum) {
   try {
@@ -76,6 +78,9 @@ searchForm.addEventListener('submit', async event => {
     gallery.innerHTML = '';
     page = 1;
     currentQuery = query;
+
+    showLoader();
+
     searchImages(currentQuery, page);
   } else {
     Notiflix.Notify.failure('Please enter a search query.');
@@ -89,15 +94,22 @@ async function searchImages(query, pageNum) {
     loadMoreBtn.style.display = 'block';
 
     Notiflix.Notify.success('Search results successfully loaded.');
+
+    hideLoader();
   } else {
     Notiflix.Notify.failure(
       'Sorry, there are no images matching your search query. Please try again.'
     );
+
+    hideLoader();
     loadMoreBtn.style.display = 'none';
   }
 }
 
-loadMoreBtn.addEventListener('click', () => {
-  page += 1;
-  searchImages(currentQuery, page);
-});
+function showLoader() {
+  loader.style.display = 'block';
+}
+
+function hideLoader() {
+  loader.style.display = 'none';
+}
