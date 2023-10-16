@@ -1,13 +1,18 @@
 import Notiflix from 'notiflix';
 import axios from 'axios';
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const API_KEY = '40069190-73f08e8403c307c87b63f7284';
 const searchForm = document.getElementById('search-form');
 const gallery = document.querySelector('.gallery');
 const loadMoreBtn = document.querySelector('.load-more');
+const lightbox = new SimpleLightbox('.gallery-item');
 
 let page = 1;
 let currentQuery = '';
+
+loadMoreBtn.style.display = 'none';
 
 async function fetchImages(query, pageNum) {
   try {
@@ -34,6 +39,10 @@ function renderImages(images) {
     const card = document.createElement('div');
     card.classList.add('photo-card');
 
+    const imgLink = document.createElement('a');
+    imgLink.classList.add('gallery-item');
+    imgLink.href = image.largeImageURL;
+
     const img = document.createElement('img');
     img.src = image.webformatURL;
     img.alt = image.tags;
@@ -41,25 +50,36 @@ function renderImages(images) {
 
     const info = document.createElement('div');
     info.classList.add('info');
-    info.innerHTML = `
-            <p class="info-item"><b>Likes:</b> ${image.likes}</p>
-            <p class="info-item"><b>Views:</b> ${image.views}</p>
-            <p class="info-item"><b>Comments:</b> ${image.comments}</p>
-            <p class="info-item"><b>Downloads:</b> ${image.downloads}</p>
-        `;
 
-    card.appendChild(img);
+    info.innerHTML = `
+      <p class="info-item"><b>Likes:</b> <span class="info-value">${image.likes}</span></p>
+      <p class="info-item"><b>Views:</b> <span class="info-value">${image.views}</span></p>
+      <p class="info-item"><b>Comments:</b> <span class="info-value">${image.comments}</span></p>
+      <p class="info-item"><b>Downloads:</b> <span class="info-value">${image.downloads}</span></p>
+    `;
+
+    imgLink.appendChild(img);
+    card.appendChild(imgLink);
     card.appendChild(info);
     gallery.appendChild(card);
   });
+
+  lightbox.refresh();
 }
 
 searchForm.addEventListener('submit', async event => {
   event.preventDefault();
-  gallery.innerHTML = '';
-  page = 1;
-  currentQuery = event.target.searchQuery.value;
-  searchImages(currentQuery, page);
+  const searchInput = event.target.searchQuery;
+  const query = searchInput.value.trim();
+
+  if (query) {
+    gallery.innerHTML = '';
+    page = 1;
+    currentQuery = query;
+    searchImages(currentQuery, page);
+  } else {
+    Notiflix.Notify.failure('Please enter a search query.');
+  }
 });
 
 async function searchImages(query, pageNum) {
@@ -67,6 +87,8 @@ async function searchImages(query, pageNum) {
   if (images.length > 0) {
     renderImages(images);
     loadMoreBtn.style.display = 'block';
+
+    Notiflix.Notify.success('Search results successfully loaded.');
   } else {
     Notiflix.Notify.failure(
       'Sorry, there are no images matching your search query. Please try again.'
