@@ -1,9 +1,8 @@
 import Notiflix from 'notiflix';
-import axios from 'axios';
+import { fetchImages } from './api';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
-const API_KEY = '40069190-73f08e8403c307c87b63f7284';
 const searchForm = document.getElementById('search-form');
 const gallery = document.querySelector('.gallery');
 const loadMoreBtn = document.querySelector('.load-more');
@@ -16,56 +15,25 @@ let currentQuery = '';
 loadMoreBtn.style.display = 'none';
 loader.style.display = 'none';
 
-async function fetchImages(query, pageNum) {
-  try {
-    const response = await axios.get('https://pixabay.com/api/', {
-      params: {
-        key: API_KEY,
-        q: query,
-        image_type: 'photo',
-        orientation: 'horizontal',
-        safesearch: true,
-        page: pageNum,
-        per_page: 40,
-      },
-    });
-
-    return response.data.hits;
-  } catch (error) {
-    console.error('Error fetching images:', error);
-  }
-}
-
 function renderImages(images) {
-  images.forEach(image => {
-    const card = document.createElement('div');
-    card.classList.add('photo-card');
+  const galleryHTML = images
+    .map(
+      image => `
+      <div class="photo-card">
+        <a class="gallery-item" href="${image.largeImageURL}">
+          <img src="${image.webformatURL}" alt="${image.tags}" loading="lazy">
+        </a>
+        <div class="info">
+          <p class="info-item"><b>Likes:</b> <span class="info-value">${image.likes}</span></p>
+          <p class="info-item"><b>Views:</b> <span class="info-value">${image.views}</span></p>
+          <p class="info-item"><b>Comments:</b> <span class="info-value">${image.comments}</span></p>
+          <p class="info-item"><b>Downloads:</b> <span class="info-value">${image.downloads}</span></p>
+        </div>
+      </div>`
+    )
+    .join('');
 
-    const imgLink = document.createElement('a');
-    imgLink.classList.add('gallery-item');
-    imgLink.href = image.largeImageURL;
-
-    const img = document.createElement('img');
-    img.src = image.webformatURL;
-    img.alt = image.tags;
-    img.loading = 'lazy';
-
-    const info = document.createElement('div');
-    info.classList.add('info');
-
-    info.innerHTML = `
-      <p class="info-item"><b>Likes:</b> <span class="info-value">${image.likes}</span></p>
-      <p class="info-item"><b>Views:</b> <span class="info-value">${image.views}</span></p>
-      <p class="info-item"><b>Comments:</b> <span class="info-value">${image.comments}</span></p>
-      <p class="info-item"><b>Downloads:</b> <span class="info-value">${image.downloads}</span></p>
-    `;
-
-    imgLink.appendChild(img);
-    card.appendChild(imgLink);
-    card.appendChild(info);
-    gallery.appendChild(card);
-  });
-
+  gallery.innerHTML = galleryHTML;
   lightbox.refresh();
 }
 
@@ -113,6 +81,7 @@ function showLoader() {
 function hideLoader() {
   loader.style.display = 'none';
 }
+
 function loadMoreImages() {
   page += 1;
   searchImages(currentQuery, page);
