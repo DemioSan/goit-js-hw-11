@@ -35,7 +35,7 @@ function renderImages(images) {
     )
     .join('');
 
-  gallery.innerHTML = galleryHTML;
+  gallery.innerHTML += galleryHTML;
   lightbox.refresh();
 }
 
@@ -69,7 +69,7 @@ async function searchImages(query, pageNum) {
   } else {
     loadMoreBtn.style.display = 'block';
   }
-  //---------------------------------------------------------------
+
   if (images.length > 0) {
     renderImages(images);
 
